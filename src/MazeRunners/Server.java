@@ -60,13 +60,25 @@ public class Server {
 
 		@Override
 		public void run() {
+			
+			synchronized(players) {
+				if(players.size() < 4) {
+					try {
+						players.wait();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} else {
+					players.notifyAll();
+				}
+			}
 			try {
 				out.writeObject(maze);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
-			
+			}	
 		}
 	}
 	

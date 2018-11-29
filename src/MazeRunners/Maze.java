@@ -1,5 +1,6 @@
 package MazeRunners;
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,6 +87,10 @@ public class Maze extends Canvas{
 				stack.pop();
 			}
 		}
+		maze[0][0].setWest(false);
+		
+		maze[rows-1][columns-1].setEast(false);
+		
 		maps.add(maze);
 	}
 	
@@ -133,6 +138,12 @@ public class Maze extends Canvas{
 			}
 		}
 		int x=10,y=10;
+		g.setColor(Color.RED);
+		g.fillRect(x, y, 20, 20);
+		g.setColor(Color.GREEN);
+		g.fillRect((20*rows)-10, (20*columns)-10, 23, 20);
+		g.setColor(Color.BLACK);
+		
 		for(int i=0; i<rows; i++) {
 			x = 10;
 			for(int j=0; j<columns; j++) {
@@ -152,7 +163,5 @@ public class Maze extends Canvas{
 			}
 			y += 20;
 		}
-
 	}
-
 }
