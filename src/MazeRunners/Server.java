@@ -62,7 +62,7 @@ public class Server {
 		public void run() {
 			
 			synchronized(players) {
-				if(players.size() < 4) {
+				if(players.size() < 1) {
 					try {
 						players.wait();
 					} catch (InterruptedException e) {
