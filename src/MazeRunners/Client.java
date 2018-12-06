@@ -30,7 +30,7 @@ public class Client {
 			password=keysc.nextLine();
 		} catch (FileNotFoundException e) {
 			System.out.println("WARNING, ClientSecret not found, using default connection configs.");
-			serverip = "76.21.138.200";
+			serverip = "localhost";
 			password = "asdf";
 		}
 		
