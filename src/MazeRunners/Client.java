@@ -30,7 +30,7 @@ public class Client {
 			password=keysc.nextLine();
 		} catch (FileNotFoundException e) {
 			System.out.println("WARNING, ClientSecret not found, using default connection configs.");
-			serverip = "localhost";
+			serverip = "76.21.138.200";
 			password = "asdf";
 		}
 		
@@ -77,7 +77,7 @@ public class Client {
 	}
 	
 	private void connect() throws UnknownHostException, IOException, ClassNotFoundException {
-		Socket socket = new Socket(serverip, 1338);
+		Socket socket = new Socket(serverip, 25565);
         System.out.print("connection ");
         out = new ObjectOutputStream(socket.getOutputStream());
         System.out.println("Ok");
