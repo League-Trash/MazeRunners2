@@ -1,5 +1,6 @@
 package MazeRunners;
 
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,7 +15,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-public class Client {
+public class Client implements Runnable {
 	private String serverip; 
 	private String password;
 	private final int MAXTRY=3;
@@ -77,13 +78,32 @@ public class Client {
 	}
 	
 	private void connect() throws UnknownHostException, IOException, ClassNotFoundException {
-		Socket socket = new Socket(serverip, 25565);
+		Socket socket = new Socket(serverip, 1338);
         System.out.print("connection ");
         out = new ObjectOutputStream(socket.getOutputStream());
         System.out.println("Ok");
-        out.writeObject(password);
+        //out.writeObject(password);
         in = new ObjectInputStream(socket.getInputStream());
         maze = (Maze)in.readObject();
+        new Thread(this).start();
+	}
+	
+	@Override
+	public void run() {
+		while (true)
+		{
+			try {
+				Point[] rivals = (Point[])in.readObject();
+				out.writeObject(new Point((int)(System.currentTimeMillis()%5000L),0));//TODO Plug player location in here
+				//TODO Paint location of Rivals
+				//System.out.println("Client chatting!");
+				
+			} catch (ClassNotFoundException | IOException e) {
+				e.printStackTrace();
+				break;
+			}
+			
+		}
 	}
 	
 	public static void main (String args[]) {
