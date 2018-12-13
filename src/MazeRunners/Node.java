@@ -7,8 +7,8 @@ public class Node implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = -40690401562303807L;
-	private int row;
-	private int col;
+	private int row; //node row position
+	private int col; //node column position
 	private boolean visited;
 	
 	//these represent walls connected to the nodes

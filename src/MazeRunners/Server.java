@@ -11,49 +11,41 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Server {
-	
+	//Rate in ms at which the Server updates the clients
 	private final int TICKRATE = 1;
 	
-	private String password;
 	private static ArrayList<Session> clients = new ArrayList<Session>();
 	private static Point[] players;
+	private static double[] times = new double[4];
+ 	private static int finished = 0;//number of players who have finished the maze
+	private static int livecount = 0;//number of players still connected to the server
 	private Maze maze;
 	public Server(){
-		Scanner keysc = null;
-		try {
-			keysc = new Scanner(new File("ServerSecret.config"));
-			password=keysc.nextLine();
-		} catch (FileNotFoundException e) {
-			System.out.println("WARNING, ServerSecret not found, using default connection configs.");
-			password = "asdf";
-		}
-		
+
 		
 		players = new Point[4];
-		maze = new Maze(25,25);
-		maze.generateMaze();
+		
 		
 		ServerSocket ss=null;
 		try {
 			ss = new ServerSocket(1338);
-			for(int i =0; i<4; i++)
-				new Thread(new Session(ss.accept(),i)).start();
+			System.out.println("Server ready");
+			while(true)
+				new Thread(new Session(ss.accept())).start();//spin off incoming connections as Session threads
 				
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		
 	}
-	
+	//Manages individual connections to clients
 	private class Session implements Runnable{
 		private Socket sock;
 		private ObjectOutputStream out;
 		private ObjectInputStream in;
 		private int id;
-		public Session(Socket s, int num){
-			id=num;
+		public Session(Socket s){
 			sock=s;
 			try {
 				out=new ObjectOutputStream(sock.getOutputStream());
@@ -62,62 +54,91 @@ public class Server {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
 			clients.add(this);
 		}
-
+        
+        //main loop for each client
 		@Override
 		public void run() {
-			
-			synchronized(clients) {
-				if(clients.size() < 4) {
-					try {
-						clients.wait();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+			while(true) {
+				synchronized(clients) {
+					id=livecount;
+					livecount++;
+					//wait until four players have joined
+					if(clients.size() < 4) {
+						try {
+							clients.wait();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					} else {
+						clients.notifyAll();
 					}
-				} else {
-					clients.notifyAll();
+					
+				//prep and send Maze
+					if (maze==null) {
+						maze = new Maze(25,25);
+						maze.generateMaze();
+					}
 				}
-			}
-			try {
-				out.writeObject(maze);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			double average = 0;
-			int size = 0;
-			while(true){
-				Point[] rivals = new Point[3];
-				int bump = 0;
-				for(int i =0; i< rivals.length; i++) {
-					if (i==id) {
-						bump =1;
+				try {
+					maze.setPlayerid(id);
+					out.writeObject(maze);
+				} catch (IOException e) {//if a player disconnects
+					livecount--;
+					clients.remove(this);
+					return;
+				}
+				
+				double average = 0;
+				int size = 0;
+				while(finished<livecount){//while players are still in the maze
+					//get location of opponent players
+					Point[] rivals = new Point[3];
+					int bump = 0;
+					for(int i =0; i< rivals.length; i++) {
+						if (i==id) {
+							bump =1;
+						}
+						if (players[i+bump]==null)
+							rivals[i] = new Point(0,0);
+						else
+							rivals[i] = players[i+bump];
 					}
-					rivals[i] = players[i+bump];
+					
+					try {
+						out.writeObject(rivals);//send opponent locations
+						players[id] = (Point)in.readObject();//recieve location of player
+						if(players[id].getX() == -999) {//check for "beat the maze" flag
+							if (times[id]==0)
+								finished++;
+							times[id] = players[id].getY()/10.0;//read in time
+						}
+						
+						Thread.sleep(TICKRATE);
+					} catch (Exception e) {//if a player disconnects
+						livecount--;
+						clients.remove(this);
+						return;
+					}
+					
 				}
 				
 				try {
-					out.writeObject(rivals);
-					players[id] = (Point)in.readObject();
-					double lag = ((int)(System.currentTimeMillis()%5000L)-players[id].getX());
-					if (lag < 0)
-						lag = 5000+lag;
-					size++;
-					average = (average*(size-1)+lag)/size;
-					System.out.println(average);
-					Thread.sleep(TICKRATE);
-				} catch (IOException | ClassNotFoundException | InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					break;
+					out.writeObject(times);
+				} catch (IOException e) {//if a player disconnects
+					livecount--;
+					clients.remove(this);
+					return;
 				}
-				
+				livecount--;
+				times[id]=0;
+				maze=null;
 			}
 		}
 	}
-	
+	//main for starting the server
 	public static void main(String args[]) {
 		new Server();
 	}
