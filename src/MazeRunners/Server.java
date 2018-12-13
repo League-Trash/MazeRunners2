@@ -12,7 +12,7 @@ import java.util.Scanner;
 
 public class Server {
 	//Rate in ms at which the Server updates the clients
-	private final int TICKRATE = 1;
+	private final int TICKRATE = 10;
 	
 	private static ArrayList<Session> clients = new ArrayList<Session>();
 	private static Point[] players;
@@ -78,7 +78,7 @@ public class Server {
 					
 				//prep and send Maze
 					if (maze==null) {
-						maze = new Maze(25,25);
+						maze = new Maze(5,5);
 						maze.generateMaze();
 					}
 				}
@@ -125,7 +125,7 @@ public class Server {
 					
 				}
 				
-				synchronized(times) {
+				
 				try {
 					out.writeObject(times);
 				} catch (IOException e) {//if a player disconnects
@@ -134,16 +134,6 @@ public class Server {
 					return;
 				}
 				livecount--;
-				if (livecount>0)
-					try {
-						times.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				else
-					times.notifyAll();
-				}
-				times[id]=0;
 				maze=null;
 			}
 		}
