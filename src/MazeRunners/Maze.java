@@ -250,7 +250,7 @@ public class Maze extends Canvas{
 			}
 			
 			if(rivals != null) { //if rivals exist
-				Color[] c = {new Color(255,200,0,65),new Color(0,255,0,100),new Color(0,255,255,100)}; //list of possible rival colors
+				Color[] c = {new Color(255,200,0,200),new Color(0,255,0,100),new Color(0,255,255,100)}; //list of possible rival colors
 				for(int i =0; i < rivals.length; i++) { //draw each rival at their current position
 					g.setColor(new Color(7,8,9));
 					g.setColor(c[i%rivals.length]);

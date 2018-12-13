@@ -125,6 +125,7 @@ public class Server {
 					
 				}
 				
+				synchronized(times) {
 				try {
 					out.writeObject(times);
 				} catch (IOException e) {//if a player disconnects
@@ -133,6 +134,15 @@ public class Server {
 					return;
 				}
 				livecount--;
+				if (livecount>0)
+					try {
+						times.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				else
+					times.notifyAll();
+				}
 				times[id]=0;
 				maze=null;
 			}

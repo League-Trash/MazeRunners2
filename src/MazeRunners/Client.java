@@ -21,7 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 public class Client implements Runnable {
-	private static final String SERVERIP = "localhost";
+	private static final String SERVERIP = "localhost";//"138.78.122.35";
 	private static final int CHECKSERVERTIME =3000;//time in milliseconds between attempts to reach the server
 	
 	private JFrame frame;
